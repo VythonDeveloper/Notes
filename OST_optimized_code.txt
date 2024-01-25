@@ -1,0 +1,60 @@
+  generateDateList() {
+    DateTime now = DateTime.now();
+    DateTime end = now.subtract(Duration(days: daysRange));
+
+    // For other days
+    for (DateTime date = now.subtract(const Duration(days: 1));
+        date.isAfter(end);
+        date = date.subtract(const Duration(days: 1))) {
+      int randomSMSCount = 8 + random.nextInt(7);
+      List<DateTime> otherDaysRandomTimes = generateRandomTimesForOtherDays(
+          startDate: date, smsCount: randomSMSCount);
+      otherDaysRandomTimes.sort();
+      dateMasterList.addAll(otherDaysRandomTimes.reversed);
+    }
+
+    // For today
+    List<DateTime> currentDayRandomTimes = generateRandomTimesForToday(
+        startDate: now, smsCount: currentDaySmsCount);
+    currentDayRandomTimes.sort();
+    dateMasterList.insertAll(0, currentDayRandomTimes.reversed.toList());
+    print("Generated Dates: ${dateMasterList.length.toString()}");
+  }
+
+  List<DateTime> generateRandomTimesForOtherDays({
+    required DateTime startDate,
+    required int smsCount,
+  }) {
+    DateTime startTime = DateTime(startDate.year, startDate.month,
+        startDate.day, startHour, startMinute, 0);
+    DateTime endTime = DateTime(
+        startDate.year, startDate.month, startDate.day, endHour, endMinute, 0);
+
+    return List.generate(
+        smsCount, (_) => generateRandomTime(startTime, endTime));
+  }
+
+  List<DateTime> generateRandomTimesForToday({
+    required DateTime startDate,
+    required int smsCount,
+  }) {
+    DateTime startTime = DateTime(
+        startDate.year, startDate.month, startDate.day, startHour, startMinute);
+    DateTime endTime = startDate;
+
+    return List.generate(smsCount, (_) {
+      DateTime newTime = generateRandomTime(startTime, endTime);
+      while (newTime.isAfter(endTime)) {
+        newTime = generateRandomTime(startTime, endTime);
+      }
+      return newTime;
+    });
+  }
+
+  DateTime generateRandomTime(DateTime startTime, DateTime endTime) {
+    int minutes = endTime.difference(startTime).inMinutes;
+    int randomMinutes = random.nextInt(minutes + 1);
+    int randomSecond = 1 + random.nextInt(59 - 1);
+    return startTime
+        .add(Duration(minutes: randomMinutes, seconds: randomSecond));
+  }
